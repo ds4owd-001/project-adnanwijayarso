@@ -1,0 +1,72 @@
+---
+title: "Comparing ASEAN Countries' Access to Adequate Drinking Water"
+date: today
+author:
+  name: "Adnan Wijayarso"
+  orcid: 0009-0005-0216-5559
+  email: "adnanwijayarso@gmail.com"
+abstract:
+  (to be summarized)
+license: "CC BY"
+format: 
+  html:
+    toc: true
+    code-fold: true
+execute: 
+  warning: false
+citation: 
+  container-title: My Blog
+  url: https://www.example.com
+editor: source
+---
+
+## Introduction
+
+This is a data analysis project to compare how drinking water access differs across ASEAN countries and how it correlates with Gross Domestic Product (GDP) per capita for each country.
+
+## Methods
+
+### Importing and tidying the data
+
+In this project, we're using two data sets:
+
+1.  The WHO/UNICEF Joint Monitoring Programme for [Water Supply, Sanitation, and Hygiene (JMP) Global Database](https://washdata.org/data/household#!/)
+
+2.  The World Bank and OECD National Accounts data files on [GDP per capita (in current US$) for East Asia & Pacific Region](https://data.worldbank.org/indicator/NY.GDP.PCAP.CD?end=2022&locations=4E&start=1960&view=chart)
+
+```{r}
+# Loading the packages
+library(tidyverse)
+library(readxl)
+library(janitor)
+
+# Importing datasets
+BRN_data_raw <- read_excel(here::here("data/raw/JMP_2023_BRN_Brunei_Darusalam.xlsx"))
+IDN_data_raw <- read_excel(here::here("data/raw/JMP_2023_IDN_Indonesia_.xlsx"))
+KHM_data_raw <- read_excel(here::here("data/raw/JMP_2023_KHM_Cambodia_.xlsx"))
+LAO_data_raw <- read_excel(here::here("data/raw/JMP_2023_LAO_Lao_Peoples_Democratic_Republic_.xlsx"))
+MMR_data_raw <- read_excel(here::here("data/raw/JMP_2023_MMR_Myanmar_.xlsx"))
+MYS_data_raw <- read_excel(here::here("data/raw/JMP_2023_MYS_Malaysia_.xlsx"))
+PHL_data_raw <- read_excel(here::here("data/raw/JMP_2023_PHL_Philippines_.xlsx"))
+SGP_data_raw <- read_excel(here::here("data/raw/JMP_2023_SGP_Singapore_.xlsx"))
+THA_data_raw <- read_excel(here::here("data/raw/JMP_2023_THA_Thailand_.xlsx"))
+VNM_data_raw <- read_excel(here::here("data/raw/JMP_2023_VNM_Viet_Nam_.xlsx"))
+GDPpercap_raw <- read_excel(here::here("data/raw/API_NY.GDP.PCAP.CD_DS2_en_excel_v2_6298460_.xlsx"))
+
+```
+
+### Analyzing and visualizing the data
+
+(TBD)
+
+## Results
+
+(TBD)
+
+## Conclusions
+
+(TBD)
+
+## References
+
+(TBD)
