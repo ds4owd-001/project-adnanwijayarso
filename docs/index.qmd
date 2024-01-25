@@ -41,17 +41,110 @@ library(readxl)
 library(janitor)
 
 # Importing datasets
-BRN_data_raw <- read_excel(here::here("data/raw/JMP_2023_BRN_Brunei_Darusalam.xlsx"))
-IDN_data_raw <- read_excel(here::here("data/raw/JMP_2023_IDN_Indonesia_.xlsx"))
-KHM_data_raw <- read_excel(here::here("data/raw/JMP_2023_KHM_Cambodia_.xlsx"))
-LAO_data_raw <- read_excel(here::here("data/raw/JMP_2023_LAO_Lao_Peoples_Democratic_Republic_.xlsx"))
-MMR_data_raw <- read_excel(here::here("data/raw/JMP_2023_MMR_Myanmar_.xlsx"))
-MYS_data_raw <- read_excel(here::here("data/raw/JMP_2023_MYS_Malaysia_.xlsx"))
-PHL_data_raw <- read_excel(here::here("data/raw/JMP_2023_PHL_Philippines_.xlsx"))
-SGP_data_raw <- read_excel(here::here("data/raw/JMP_2023_SGP_Singapore_.xlsx"))
-THA_data_raw <- read_excel(here::here("data/raw/JMP_2023_THA_Thailand_.xlsx"))
-VNM_data_raw <- read_excel(here::here("data/raw/JMP_2023_VNM_Viet_Nam_.xlsx"))
+WLD_data_raw <- read_excel(here::here("data/raw/JMP_2023_WLD_.xlsx"))
 GDPpercap_raw <- read_excel(here::here("data/raw/API_NY.GDP.PCAP.CD_DS2_en_excel_v2_6298460_.xlsx"))
+
+# Tidying JMP datasets
+WLD_data_noref <- WLD_data_raw[3:5361,] |> 
+  mutate(id = row_number()) |> 
+  relocate(id, .before = "DRINKING WATER") |>
+  relocate(...43, .before = "DRINKING WATER") |> 
+  rename(sdg_region = ...43) |> 
+  rename(country = `DRINKING WATER`) |> 
+  rename(year = Year) |> 
+  rename(population_1000 = `Population(thousands)`) |> 
+  rename(rural_basic = RURAL...6) |> 
+  rename(rural_limited = ...7) |> 
+  rename(rural_unimproved = ...8) |> 
+  rename(rural_surfacewater = ...9) |> 
+  rename(urban_basic = URBAN...11) |> 
+  rename(urban_limited = ...12) |> 
+  rename(urban_unimproved = ...13) |> 
+  rename(urban_surfacewater = ...14) |> 
+  rename(national_basic = TOTAL...16) |> 
+  rename(national_limited = ...17) |> 
+  rename(national_unimproved = ...18) |> 
+  rename(national_surfacewater = ...19) |> 
+  rename(rural_safelymanaged = RURAL...21) |> 
+  relocate(rural_safelymanaged, .before = rural_basic) |> 
+  rename(rural_piped = ...26) |> 
+  rename(rural_nonpiped = ...27) |> 
+  rename(urban_safelymanaged = URBAN...28) |> 
+  relocate(urban_safelymanaged, .before = urban_basic) |> 
+  rename(urban_piped = ...33) |> 
+  rename(urban_nonpiped = ...34) |> 
+  rename(national_safelymanaged = TOTAL...35) |> 
+  relocate(national_safelymanaged, .before = national_basic) |> 
+  rename(national_piped = ...40) |> 
+  rename(national_nonpiped = ...41) |> 
+  relocate(...10, .after = ...46) |> 
+  relocate(...15, .after = ...46) |> 
+  relocate(...20, .after = ...46) |> 
+  relocate(...22, .after = ...46) |> 
+  relocate(...23, .after = ...46) |>
+  relocate(...24, .after = ...46) |> 
+  relocate(...25, .after = ...46) |> 
+  relocate(...29, .after = ...46) |> 
+  relocate(...30, .after = ...46) |> 
+  relocate(...31, .after = ...46) |> 
+  relocate(...32, .after = ...46) |> 
+  relocate(...36, .after = ...46) |> 
+  relocate(...37, .after = ...46) |> 
+  relocate(...38, .after = ...46) |> 
+  relocate(...39, .after = ...46) |> 
+  relocate(`% urban`, .after = ...46)
+WLD_data_noref <- WLD_data_noref[,1:27]
+WLD_iso3_year <- WLD_data_noref[,1:5] |> 
+  unite(iso3_year, ISO3, year, sep = "_") |> 
+  relocate(iso3_year, .after = "id")
+WLD_iso3_year <- WLD_iso3_year[,1:2]
+WLD_data <- WLD_data_noref |> 
+  left_join(WLD_iso3_year, by = "id") |> 
+  relocate("iso3_year", .after = year)
+
+
+# Tidying World Bank GDP per capita dataset
+GDPpercap_varnames <- c(GDPpercap_raw[3,])
+GDPpercap <- GDPpercap_raw[4:269,]
+names(GDPpercap) <- GDPpercap_varnames
+GDPpercap <- GDPpercap |> 
+  rename(country = `Country Name`) |> 
+  rename(iso3 = `Country Code`) |> 
+  rename(sdg_region = Region) |> 
+  rename(income_group = IncomeGroup) |> 
+  relocate(`Indicator Name`, .before = country) |> 
+  relocate(`Indicator Code`, .before = country)
+GDPpercap_long_noref <- GDPpercap[,3:69] |> 
+  pivot_longer(cols = "1960":"2022",
+               names_to = "year",
+               values_to = "GDPpercap") |> 
+  relocate(year, .after = iso3) |> 
+  mutate(id = row_number()) |> 
+  relocate(id, .before = country)
+GDP_iso3_year <- GDPpercap_long_noref[,1:4] |> 
+  unite(iso3_year, iso3, year, sep = "_") |> 
+  relocate("iso3_year", .after = "id")
+GDPpercap_long <- GDPpercap_long_noref |> 
+  left_join(GDP_iso3_year, by = "id") |> 
+  relocate(sdg_region, .before = "country.x") |> 
+  relocate("iso3_year", .after = "year")
+GDPpercap_long <- GDPpercap_long[,6:8] |> 
+  mutate(id = row_number()) |> 
+  relocate("id", .before = "iso3_year")
+  
+
+# Merging JMP and GDP dataset into a new WaterService_vs_GDP object
+WaterService_vs_GDP <- WLD_data |> 
+  left_join(GDPpercap_long, by = "iso3_year") |> 
+  relocate(income_group, .before = "population_1000") |> 
+  relocate(GDPpercap, .before = "population_1000") |> 
+  relocate("iso3_year", .after = national_nonpiped)
+WaterService_vs_GDP <- WaterService_vs_GDP[,1:29] |> 
+  rename(id = id.x)
+
+
+# Writing WaterService_vs_GDP.csv from  WaterService_vs_GDP object
+write_csv(WaterService_vs_GDP, here::here("data/processed/WaterService_vs_GDP.csv"))
 
 ```
 
