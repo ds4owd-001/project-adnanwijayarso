@@ -214,6 +214,13 @@ WaterService_vs_GDP_regionAVG <- WaterService_vs_GDP_long |>
   relocate(refcolumn, .after = "id") |> 
   group_by(refcolumn) |> 
   summarise(GDPpercap = median(GDPpercap, na.rm = TRUE))
+
+# Subsetting to see why na.rm in line 216 doesn't work
+WaterService_vs_GDP_regionAVG_median <- WaterService_vs_GDP_regionAVG |> 
+  filter(refcolumn == "Central and Southern Asia_2000_national_basic_NA") |> 
+  summarise(GDPmedian = median(GDPpercap, na.rm = TRUE))
+
+#  summarise(GDPpercap = median(GDPpercap, na.rm = TRUE))
 #            country_population_1000 = sum(country_population_1000, na.rm = TRUE),
 #            served_population_1000 = sum(served_population_1000, na.rm = TRUE)) 
 #  rename(sdgregion_year_residence_levelsservice_methodservice = refcolumn) |> 
@@ -306,17 +313,16 @@ WaterService_vs_GDP_regionAVG <- WaterService_vs_GDP_long |>
 ```{r}
 
 # 1st plot = comparing service levels of ASEAN countries to other regions
-WaterService_vs_GDP_ASEAN_plot1 <- WaterService_vs_GDP_ASEAN |> 
-  filter(residence == "national",
-         year == 2022) |> 
-  group_by(region) |> 
-  summarise(GDPpercap = median(GDPpercap, na.rm = TRUE),
-            percentage = mean(percentage, na.rm = TRUE))
-# cek perhitungan percentage looo arghh
-  
-ggplot(data = WaterService_vs_GDP_ASEAN_plot1,
-       mapping = aes(x = region, y = percentage)) +
-  geom_col()
+#WaterService_vs_GDP_ASEAN_plot1 <- WaterService_vs_GDP_ASEAN |> 
+#  filter(residence == "national",
+#         year == 2022) |> 
+#  group_by(region) |> 
+#  summarise(GDPpercap = median(GDPpercap, na.rm = TRUE),
+#           percentage = mean(percentage, na.rm = TRUE))
+
+#ggplot(data = WaterService_vs_GDP_ASEAN_plot1,
+#       mapping = aes(x = region, y = percentage)) +
+#  geom_col()
 
 
 ```
