@@ -93,7 +93,82 @@ WLD_data_noref <- WLD_data_raw[3:5361,] |>
   relocate(...36, .after = ...46) |> 
   relocate(...37, .after = ...46) |> 
   relocate(...38, .after = ...46) |> 
-  relocate(...39, .after = ...46)
+  relocate(...39, .after = ...46) |> 
+  # Making sure there are no >99 and <1 in rural column
+  mutate(rural_safelymanaged = case_when(
+    rural_safelymanaged == ">99" ~ "99",
+    rural_safelymanaged == "<1" ~ "1",
+    TRUE ~ rural_safelymanaged)) |> 
+  mutate(rural_basic = case_when(
+    rural_basic == ">99" ~ "99",
+    rural_basic == "<1" ~ "1",
+    TRUE ~ rural_basic)) |>
+  mutate(rural_unimproved = case_when(
+    rural_unimproved == ">99" ~ "99",
+    rural_unimproved == "<1" ~ "1",
+    TRUE ~ rural_unimproved)) |>  
+  mutate(rural_surfacewater = case_when(
+    rural_surfacewater == ">99" ~ "99",
+    rural_surfacewater == "<1" ~ "1",
+    TRUE ~ rural_surfacewater)) |>  
+  mutate(rural_piped = case_when(
+    rural_piped == ">99" ~ "99",
+    rural_piped == "<1" ~ "1",
+    TRUE ~ rural_piped)) |>    
+  mutate(rural_nonpiped = case_when(
+    rural_nonpiped == ">99" ~ "99",
+    rural_nonpiped == "<1" ~ "1",
+    TRUE ~ rural_nonpiped)) |>
+  # Making sure there are no >99 and <1 in urban column
+  mutate(urban_safelymanaged = case_when(
+    urban_safelymanaged == ">99" ~ "99",
+    urban_safelymanaged == "<1" ~ "1",
+    TRUE ~ urban_safelymanaged)) |> 
+  mutate(urban_basic = case_when(
+    urban_basic == ">99" ~ "99",
+    urban_basic == "<1" ~ "1",
+    TRUE ~ urban_basic)) |>
+  mutate(urban_unimproved = case_when(
+    urban_unimproved == ">99" ~ "99",
+    urban_unimproved == "<1" ~ "1",
+    TRUE ~ urban_unimproved)) |>  
+  mutate(urban_surfacewater = case_when(
+    urban_surfacewater == ">99" ~ "99",
+    urban_surfacewater == "<1" ~ "1",
+    TRUE ~ urban_surfacewater)) |>  
+  mutate(urban_piped = case_when(
+    urban_piped == ">99" ~ "99",
+    urban_piped == "<1" ~ "1",
+    TRUE ~ urban_piped)) |>    
+  mutate(urban_nonpiped = case_when(
+    urban_nonpiped == ">99" ~ "99",
+    urban_nonpiped == "<1" ~ "1",
+    TRUE ~ urban_nonpiped)) |>
+  # Making sure there are no >99 and <1 in national column
+  mutate(national_safelymanaged = case_when(
+    national_safelymanaged == ">99" ~ "99",
+    national_safelymanaged == "<1" ~ "1",
+    TRUE ~ national_safelymanaged)) |> 
+  mutate(national_basic = case_when(
+    national_basic == ">99" ~ "99",
+    national_basic == "<1" ~ "1",
+    TRUE ~ national_basic)) |>
+  mutate(national_unimproved = case_when(
+    national_unimproved == ">99" ~ "99",
+    national_unimproved == "<1" ~ "1",
+    TRUE ~ national_unimproved)) |>  
+  mutate(national_surfacewater = case_when(
+    national_surfacewater == ">99" ~ "99",
+    national_surfacewater == "<1" ~ "1",
+    TRUE ~ national_surfacewater)) |>  
+  mutate(national_piped = case_when(
+    national_piped == ">99" ~ "99",
+    national_piped == "<1" ~ "1",
+    TRUE ~ national_piped)) |>    
+  mutate(national_nonpiped = case_when(
+    national_nonpiped == ">99" ~ "99",
+    national_nonpiped == "<1" ~ "1",
+    TRUE ~ national_nonpiped))
 WLD_data_noref <- WLD_data_noref[,1:28]
 WLD_iso3_year <- WLD_data_noref[,1:5] |> 
   unite(iso3_year, ISO3, year, sep = "_") |> 
@@ -173,14 +248,12 @@ WaterService_vs_GDP_long <- WaterService_vs_GDP_wide |>
   mutate(percentage = as.numeric(percentage)) |> 
   # Counting served population_1000 on national, urban, and rural level
     mutate(served_population_1000 = case_when(
-    residence == "national" ~ country_population_1000 * (percentage/100),
-    residence == "urban" ~ country_population_1000 * (`% urban`/100) * (percentage/100),
-    residence == "rural" ~ country_population_1000 * ((100 - `% urban`)/100) * (percentage/100))) |> 
+      residence == "national" ~ country_population_1000 * (percentage/100),
+      residence == "urban" ~ country_population_1000 * (`% urban`/100) * (percentage/100),
+      residence == "rural" ~ country_population_1000 * ((100 - `% urban`)/100) * (percentage/100))) |> 
   relocate(served_population_1000, .after = percentage) |> 
   rename(served_percentage = percentage)
-
 WaterService_vs_GDP_long <- WaterService_vs_GDP_long[,1:14]
-glimpse(WaterService_vs_GDP_long)
 
 # Establishing the level_income and level_service using factor
 factor_income <- c("High income","Upper middle income", "Lower middle income", "Low income")
@@ -202,8 +275,9 @@ WaterService_vs_GDP_long <- WaterService_vs_GDP_long |>
     ISO3 == "IDN" ~ "ASEAN",
     TRUE ~ NA)) |> 
   relocate(new_region, .after = sdg_region) |> 
-  rename(urban_percentage = `% urban`)
-  
+  rename(urban_percentage = `% urban`) |> 
+  mutate(GDPpercap = as.numeric(GDPpercap))
+
 # Grouping each region so that we can compare the average of each region to ASEAN countries
 WaterService_vs_GDP_refcolumn <- WaterService_vs_GDP_long |> 
   unite(refcolumn, sdg_region, year, residence, levels_service, method_waterservice, sep = "_") |> 
@@ -212,97 +286,112 @@ WaterService_vs_GDP_refcolumn <- WaterService_vs_GDP_refcolumn[,1:2]
 WaterService_vs_GDP_regionAVG <- WaterService_vs_GDP_long |> 
   left_join(WaterService_vs_GDP_refcolumn, by = "id") |> 
   relocate(refcolumn, .after = "id") |> 
+  mutate(GDPpercap = as.numeric(GDPpercap)) |> 
   group_by(refcolumn) |> 
-  summarise(GDPpercap = median(GDPpercap, na.rm = TRUE))
+  summarise(GDPpercap = median(GDPpercap, na.rm = TRUE),
+            served_population_1000 = sum(served_population_1000, na.rm = TRUE),
+            country_population_1000 = sum(country_population_1000, na.rm = TRUE)) |> 
+  rename(sdgregion_year_residence_levelsservice_methodservice = refcolumn) |> 
+  separate_wider_delim(cols = sdgregion_year_residence_levelsservice_methodservice,
+                       names = c("sdg_region", "year", "residence", "levels_service", "method_waterservice"),
+                       delim = "_") |> 
+  mutate(year = as.numeric(year)) |> 
+  mutate(id = row_number()) |> 
+  relocate(id, .before = sdg_region) |> 
+  mutate(new_region = sdg_region) |> 
+  relocate(new_region, .after = sdg_region)
+# Calculating urban percentage and joining them to WaterService_vs_GDP_worldAVG object
+WaterService_vs_GDP_region_urbanpercentage <- WaterService_vs_GDP_regionAVG |> 
+  filter(residence == "urban",
+         levels_service == "surface water" | levels_service == "unimproved" | levels_service == "limited" | levels_service == "basic") |> 
+  group_by(sdg_region, year) |> 
+  summarise(urban_population_1000 = sum(served_population_1000),
+            country_population_1000 = max(country_population_1000)) |> 
+  mutate(urban_percentage = urban_population_1000 / country_population_1000 * 100) |> 
+  relocate(urban_percentage, .after = year) |> 
+  unite(region_year, sdg_region, year, sep = "_")
 
-# Subsetting to see why na.rm in line 216 doesn't work
-WaterService_vs_GDP_regionAVG_median <- WaterService_vs_GDP_regionAVG |> 
-  filter(refcolumn == "Central and Southern Asia_2000_national_basic_NA") |> 
-  summarise(GDPmedian = median(GDPpercap, na.rm = TRUE))
-
-#  summarise(GDPpercap = median(GDPpercap, na.rm = TRUE))
-#            country_population_1000 = sum(country_population_1000, na.rm = TRUE),
-#            served_population_1000 = sum(served_population_1000, na.rm = TRUE)) 
-#  rename(sdgregion_year_residence_levelsservice_methodservice = refcolumn) |> 
-#  rename(population_1000 = served_population_1000) |>
-#  separate_wider_delim(cols = sdgregion_year_residence_levelsservice_methodservice,
-#                       names = c("sdg_region", "year", "residence", "levels_service", "method_waterservice"),
-#                       delim = "_") |> 
-#  mutate(year = as.numeric(year)) |> 
-#  mutate(id = row_number()) |> 
-#  relocate(id, .before = sdg_region)
-#WaterService_vs_GDP_regionAVG_refcolumn <- WaterService_vs_GDP_regionAVG[,1:4] |> 
-#  unite(region_year_residence, sdg_region, year, residence, sep = "_")
-#WaterService_vs_GDP_regionAVG <- WaterService_vs_GDP_regionAVG |> 
-#  left_join(WaterService_vs_GDP_regionAVG_refcolumn, by = "id")
-#WaterService_vs_GDP_region_yearlysum <- WaterService_vs_GDP_regionAVG |> 
-#  filter(levels_service == "surface" | levels_service == "unimproved" | levels_service == "limited" | levels_service == "basic") |> 
-#  group_by(sdg_region, year, residence) |> 
-#  summarise(served_population_1000 = sum(population_1000)) |> 
-#  unite(region_year_residence, sdg_region, year, residence, sep = "_")
-#WaterService_vs_GDP_regionAVG <- WaterService_vs_GDP_regionAVG |> 
-#  left_join(WaterService_vs_GDP_region_yearlysum, by = "region_year_residence")
-#WaterService_vs_GDP_regionAVG <- WaterService_vs_GDP_regionAVG |>
-#  mutate(percentage = population_1000/served_population_1000) |> 
-#  relocate(region_year_residence, .after = residence) |> 
-#  mutate(new_region = sdg_region) |> 
-#  relocate(new_region, .before = year)
+# Biar WaterService_vs_GDP_regionAVG bisa dijoin sama WaterService_vs_GDP_region_urbanpercentage
+WaterService_vs_GDP_regionAVG_refcolumn <- WaterService_vs_GDP_regionAVG[,1:4] |> 
+  unite(region_year, sdg_region, year, sep = "_")
+WaterService_vs_GDP_regionAVG <- WaterService_vs_GDP_regionAVG |> 
+  left_join(WaterService_vs_GDP_regionAVG_refcolumn[,1:2], by = "id")
+WaterService_vs_GDP_regionAVG <- WaterService_vs_GDP_regionAVG |> 
+  left_join(WaterService_vs_GDP_region_urbanpercentage[,1:2], by = "region_year") |> 
+  relocate(GDPpercap, .after = year) |> 
+  relocate(country_population_1000, .after = GDPpercap) |> 
+  relocate(urban_percentage, .after = country_population_1000) |> 
+  mutate(served_percentage = served_population_1000 / country_population_1000 * 100) |> 
+  relocate(served_percentage, .before = served_population_1000)
+WaterService_vs_GDP_regionAVG <- WaterService_vs_GDP_regionAVG[,1:12]
 
 # Counting world average so that we can compare access level average of the world to ASEAN countries
-#WaterService_vs_GDP_refcolumn2 <- WaterService_vs_GDP_long |> 
-#  unite(refcolumn, year, residence, levels_service, method_waterservice, sep = "_") |> 
-#  relocate(refcolumn, .after = "id") |> 
-#  # cek sum dari sini
-#  mutate(served_population_1000 = population_1000 * percentage / 100) |> 
-#  relocate(served_population_1000, .after = refcolumn)
-#WaterService_vs_GDP_refcolumn2 <- WaterService_vs_GDP_refcolumn2[,1:3]
-#WaterService_vs_GDP_worldAVG <- WaterService_vs_GDP_long |> 
-#  left_join(WaterService_vs_GDP_refcolumn2, by = "id") |> 
-#  relocate(refcolumn, .after = "id") |> 
-#  group_by(refcolumn) |>
-#  # ini yang kayaknya salah sum
-#  summarise(served_population_1000 = sum(served_population_1000, na.rm = TRUE)) |> 
-#  rename(year_residence_levelsservice_methodservice = refcolumn) |> 
-#  rename(population_1000 = served_population_1000) |>
-#  separate_wider_delim(cols = year_residence_levelsservice_methodservice,
-#                       names = c("year", "residence", "levels_service", "method_waterservice"),
-#                       delim = "_") |> 
-#  mutate(year = as.numeric(year)) |> 
-#  mutate(id = row_number()) |> 
-#  relocate(id, .before = year)
-#WaterService_vs_GDP_worldAVG_refcolumn <- WaterService_vs_GDP_worldAVG[,1:3] |> 
-#  unite(year_residence, year, residence, sep = "_") |> 
-#  mutate(id = row_number()) |> 
-#  relocate(id, .before = year_residence)
-#WaterService_vs_GDP_worldAVG <- WaterService_vs_GDP_worldAVG |> 
-#  left_join(WaterService_vs_GDP_worldAVG_refcolumn, by = "id")
-#WaterService_vs_GDP_world_yearlysum <- WaterService_vs_GDP_worldAVG |> 
-#  filter(levels_service == "surface" | levels_service == "unimproved" | levels_service == "limited" | levels_service == "basic") |> 
-#  group_by(year, residence) |> 
-#  summarise(served_population_1000 = sum(population_1000)) |> 
-#  unite(year_residence, year, residence, sep = "_")
-#WaterService_vs_GDP_worldAVG <- WaterService_vs_GDP_worldAVG |> 
-#  left_join(WaterService_vs_GDP_world_yearlysum, by = "year_residence")
-#WaterService_vs_GDP_worldAVG <- WaterService_vs_GDP_worldAVG |>
-#  mutate(percentage = population_1000/served_population_1000) |> 
-#  relocate(year_residence, .after = residence) |> 
-#  mutate(new_region = "World average") |> 
-#  relocate(new_region, .before = year)
+WaterService_vs_GDP_refcolumn2 <- WaterService_vs_GDP_long |> 
+  unite(refcolumn, year, residence, levels_service, method_waterservice, sep = "_") |> 
+  relocate(refcolumn, .after = "id") |> 
+  relocate(served_population_1000, .after = refcolumn)
+WaterService_vs_GDP_refcolumn2 <- WaterService_vs_GDP_refcolumn2[,1:2]
+WaterService_vs_GDP_worldAVG <- WaterService_vs_GDP_long |> 
+  left_join(WaterService_vs_GDP_refcolumn2, by = "id") |> 
+  relocate(refcolumn, .after = "id") |>
+  mutate(GDPpercap = as.numeric(GDPpercap)) |> 
+  group_by(refcolumn) |>
+  summarise(served_population_1000 = sum(served_population_1000, na.rm = TRUE),
+            country_population_1000 = sum(country_population_1000, na.rm = TRUE),
+            GDPpercap = median(GDPpercap, na.rm = TRUE)) |>  
+  rename(year_residence_levelsservice_methodservice = "refcolumn") |> 
+  rename(population_1000 = served_population_1000) |>
+  separate_wider_delim(cols = year_residence_levelsservice_methodservice,
+                       names = c("year", "residence", "levels_service", "method_waterservice"),
+                       delim = "_") |> 
+  mutate(year = as.numeric(year)) |> 
+  mutate(id = row_number()) |> 
+  relocate(id, .before = year) |> 
+  mutate(new_region = "World average") |> 
+  relocate(new_region, .before = year)
+# Calculating urban percentage and joining them to WaterService_vs_GDP_worldAVG object
+WaterService_vs_GDP_world_urbanpercentage <- WaterService_vs_GDP_worldAVG |> 
+  filter(residence == "urban",
+         levels_service == "surface water" | levels_service == "unimproved" | levels_service == "limited" | levels_service == "basic") |> 
+  group_by(year) |> 
+  summarise(urban_population_1000 = sum(population_1000),
+            country_population_1000 = max(country_population_1000)) |> 
+  mutate(urban_percentage = urban_population_1000 / country_population_1000 * 100) |> 
+  relocate(urban_percentage, .after = year)
+WaterService_vs_GDP_worldAVG <- WaterService_vs_GDP_worldAVG |> 
+  left_join(WaterService_vs_GDP_world_urbanpercentage[,1:2], by = "year") |> 
+  relocate(GDPpercap, .after = "year") |> 
+  relocate(country_population_1000, .after = GDPpercap) |> 
+  rename(served_population_1000 = population_1000) |> 
+  relocate(urban_percentage, .after = country_population_1000) |> 
+  mutate(served_percentage = served_population_1000 / country_population_1000 * 100) |> 
+  relocate(served_percentage, .before = served_population_1000)
 
-# Binding region average and world average to WaterService_vs_GDP object
-#WaterService_vs_GDP <- bind_rows(WaterService_vs_GDP_long, WaterService_vs_GDP_regionAVG, WaterService_vs_GDP_worldAVG)
-#WaterService_vs_GDP_ASEAN <- WaterService_vs_GDP |> 
-#  filter(!is.na(new_region)) |> 
-#  mutate(id = row_number()) |> 
-#  relocate(sdg_region, .after = year_residence) |>
-#  rename(region = new_region) |> 
-#  rename(levels_waterservice = levels_service) |> 
-#  mutate(levels_waterservice = factor(levels_waterservice, levels = factor_waterservice))
-#WaterService_vs_GDP_ASEAN <- WaterService_vs_GDP_ASEAN[,1:12]
-#glimpse(WaterService_vs_GDP_ASEAN)
+# Binding region average and world average to WaterService_vs_GDP_region_worldAVG object
+WaterService_vs_GDP_region_worldAVG <- bind_rows(WaterService_vs_GDP_regionAVG, WaterService_vs_GDP_worldAVG)
+WaterService_vs_GDP_region_worldAVG <- WaterService_vs_GDP_region_worldAVG |> 
+  relocate(sdg_region, .after = served_population_1000) |>
+  rename(region = new_region) |>
+  rename(levels_waterservice = levels_service) |> 
+  mutate(levels_waterservice = factor(levels_waterservice, levels = factor_waterservice))
+WaterService_vs_GDP_region_worldAVG <- WaterService_vs_GDP_region_worldAVG[,1:11]
+
+# Creating WaterService_vs_GDP_ASEAN object containing the details of each country 
+WaterService_vs_GDP_ASEAN <- WaterService_vs_GDP_long |> 
+  filter(new_region == "ASEAN") |> 
+  mutate(id = row_number()) |> 
+  relocate(sdg_region, .after = served_population_1000) |>
+  rename(region = new_region) |> 
+  rename(levels_waterservice = levels_service) |> 
+  mutate(levels_waterservice = factor(levels_waterservice, levels = factor_waterservice))
+WaterService_vs_GDP_ASEAN <- WaterService_vs_GDP_ASEAN[,1:14]
+
+# Writing WaterService_vs_GDP_region_worldAVG.csv from WaterService_vs_GDP_region_worldAVG object
+write_csv(WaterService_vs_GDP_region_worldAVG, here::here("data/processed/WaterService_vs_GDP_region_worldAVG.csv"))
 
 # Writing WaterService_vs_GDP_ASEAN.csv from  WaterService_vs_GDP_ASEAN object
-#write_csv(WaterService_vs_GDP_ASEAN, here::here("data/processed/WaterService_vs_GDP_ASEAN.csv"))
+write_csv(WaterService_vs_GDP_ASEAN, here::here("data/processed/WaterService_vs_GDP_ASEAN.csv"))
+
 
 ```
 
@@ -311,18 +400,63 @@ WaterService_vs_GDP_regionAVG_median <- WaterService_vs_GDP_regionAVG |>
 (TBD)
 
 ```{r}
+#| fig-width: 8
+#| label: fig-1
+#| fig-cap: ASEAN drinking water service level, compared to other SDG regions and world average
 
-# 1st plot = comparing service levels of ASEAN countries to other regions
-#WaterService_vs_GDP_ASEAN_plot1 <- WaterService_vs_GDP_ASEAN |> 
-#  filter(residence == "national",
-#         year == 2022) |> 
-#  group_by(region) |> 
-#  summarise(GDPpercap = median(GDPpercap, na.rm = TRUE),
-#           percentage = mean(percentage, na.rm = TRUE))
+library(ggplot2)
 
-#ggplot(data = WaterService_vs_GDP_ASEAN_plot1,
-#       mapping = aes(x = region, y = percentage)) +
-#  geom_col()
+# 1st plot = comparing 2022 drinking water service levels of ASEAN countries to other regions and world average
+
+# Filtering ASEAN's 2022 data on the national level of drinking water service levels
+# Preparing ASEAN urban percentage
+WaterService_vs_GDP_ASEAN_2022_nationalurban <- WaterService_vs_GDP_ASEAN |> 
+  filter(year == 2022,
+         residence == "national" | residence == "urban",
+         levels_waterservice != "safely managed" & levels_waterservice != "improved") |> 
+  group_by(region, residence, levels_waterservice) |> 
+  summarise(served_population_1000 = sum(served_population_1000, na.rm = TRUE),
+            country_population_1000 = sum(country_population_1000, na.rm = TRUE)) |> 
+  group_by(region, residence) |> 
+  summarise(served_population_1000 = sum(served_population_1000, na.rm = TRUE),
+            country_population_1000 = mean(country_population_1000, na.rm = TRUE)) |> 
+  mutate(urban_percentage = served_population_1000 / country_population_1000 * 100) |> 
+  relocate(urban_percentage, .after = region)
+WaterService_vs_GDP_ASEANAVG_2022 <- WaterService_vs_GDP_ASEAN |> 
+  filter(year == 2022,
+         residence == "national",
+         levels_waterservice != "safely managed" & levels_waterservice != "improved") |> 
+  group_by(region, year, residence, levels_waterservice) |> 
+  summarise(served_population_1000 = sum(served_population_1000, na.rm = TRUE),
+            country_population_1000 = sum(country_population_1000, na.rm = TRUE),
+            GDPpercap = median(GDPpercap, na.rm = TRUE)) |> 
+  mutate(served_percentage = served_population_1000 / country_population_1000 * 100) |> 
+  left_join(WaterService_vs_GDP_ASEAN_2022_nationalurban[2,1:2])
+
+# Filtering region and world average data of drinking water service levels
+WaterService_vs_GDP_region_worldAVG_2022 <- WaterService_vs_GDP_region_worldAVG |> 
+  filter(year == 2022,
+         residence == "national",
+         levels_waterservice != "safely managed" & levels_waterservice != "improved")
+
+# Data to be plotted
+plot1 <- WaterService_vs_GDP_region_worldAVG_2022 |> 
+  bind_rows(WaterService_vs_GDP_ASEANAVG_2022) |>
+  mutate(id = row_number())
+glimpse(plot1)
+ggplot(data = plot1,
+       mapping = aes(x = region,
+                     y = served_percentage,
+                     fill = levels_waterservice)) +
+  geom_col() +
+  coord_flip() +
+  labs(x = "Region", y = "% of served households") +
+  geom_text(aes(label = round(served_percentage, 1)),
+            position = position_stack(vjust = 0.5),
+            size = 3,
+            color = "white") +
+  theme(legend.position = "bottom") +
+  guides(fill = guide_legend(title = "Water service level"))
 
 
 ```
