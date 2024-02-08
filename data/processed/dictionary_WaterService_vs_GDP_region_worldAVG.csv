@@ -5,8 +5,8 @@ year;Year of the estimated data
 GDPpercap;Yearly Gross Domestic Product (GDP) per capita for each country, in current US$
 country_population_1000;Yearly population for each country, in thousands
 urban_percentage;Percentage of households in urban area for each region
-residence;"Urban-rural classification of household as defined by the US Census Bureau, with ""national"" classification added to define the drinking water access on a national level"
-levels_waterservice;"The JMP ladder to compare service levels across countries (safely managed, basic, limited, unimproved, surface water), with ""improved"" level added to differentiate ""piped"" and ""non-piped"" service in method_waterservice variable"
+residence;Urban-rural classification of household as defined by the US Census Bureau, with national classification added to define the drinking water access on a national level
+levels_waterservice;"The JMP ladder to compare service levels across countries (safely managed, basic, limited, unimproved, surface water), with ""improved"" level added to differentiate piped and non-piped service in method_waterservice variable"
 method_waterservice;Source of improved drinking water service (piped and non-piped)
 served_percentage;Percentage of households with access to drinking water for every region, country, year, residence, levels of water service, and methods of water service
 served_population_1000;Number of households with access to drinking water for every region, country, year, residence, levels of water service, and methods of water service
