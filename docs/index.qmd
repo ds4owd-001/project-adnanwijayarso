@@ -1,12 +1,12 @@
 ---
-title: "Drinking Water Access and Gross Domestic Product (GDP) per capita in ASEAN Countries: A Comparative Study"
+title: "Drinking Water Service Level and Gross Domestic Product (GDP) per capita in ASEAN Countries: A Comparative Study"
 date: today
 author:
   name: "Adnan Wijayarso"
   orcid: 0009-0005-0216-5559
   email: "adnanwijayarso@gmail.com"
 abstract:
-  (to be summarized)
+  The current Eastern and South-Eastern Asia region defined by the United Nations (UN) to report the progress towards Sustainable Development Goals (SDGs) target contains two contrasting groups of countries, in terms of income — therefore it is justified to emphasize the study on ASEAN countries as they may need to narrow the gap in drinking water service level compared to higher income countries. The study finds that the ASEAN region ranks 6th of all regions in level of access to improved drinking water service (94.9% of households served) and 3rd of all regions in level of access to safely managed drinking water service (39.8% of households served). Households in Singapore and Malaysia have the highest access to safely managed drinking water service in the ASEAN region, with service level being 99% and 93.9%, respectively. A strong, positive correlation (Spearman's correlation coefficient ρ = 0.72, p-value = 0.000) exists between ASEAN and other countries’ access level to improved drinking water service and their GDP per capita. An even stronger correlation (Spearman's correlation coefficient ρ = 0.88, p-value = 0.000) exists between ASEAN and other countries’ access level to safely managed drinking water service and their GDP per capita.
 license: "CC BY"
 format: 
   html:
@@ -17,6 +17,8 @@ execute:
 citation: 
   container-title: My Blog
   url: https://www.example.com
+bibliography: references.bib
+link-citations: true
 editor: source
 ---
 
@@ -24,23 +26,35 @@ editor: source
 
 Clean drinking water is essential for our life, therefore universal access to safe drinking water is a fundamental human right. On September 2000, the United Nations declared the Millenium Development Goals (MDGs) which targeted to halve the proportion of the population without sustainable access to safe drinking water by 2015. The agenda was even made to be more ambitious by the declaration of Sustainable Development Goals (SDGs) in 2016 which targets all countries participating to ensure availability of safely managed drinking water by 2030.
 
-Achieving the goal obviously requires tremendous resources, and Gross Domestic Product (GDP) is the most used tool by governments to measure the economic health of a country. This data analysis project is meant to explore how drinking water access differs across ASEAN countries and how it correlates with Gross Domestic Product (GDP) per capita for each country.
+The United Nations (UN) currently reports the progress made towards SDGs target by dividing the world into eight regions, one of them being Eastern and South-Eastern Asia. At a glance, there seems to be a contrast between East Asian countries (which is dominated by higher income countries such as Japan, China, and South Korea) and Southeast Asian/ASEAN countries (which is dominated by middle income countries such as Indonesia, Thailand, and Viet Nam). Achieving the goal obviously requires tremendous resources, therefore it is justified to emphasize the study on ASEAN countries as they may need to narrow the gap in drinking water service level compared to higher income countries.
+
+This data analysis project is created to explore how drinking water service level differs across ASEAN countries and how it correlates with their Gross Domestic Product (GDP) per capita as the most used tool by governments to measure the economic health of a country, in comparison to other SDG regions.
 
 ## Methods
 
-### Importing and tidying the data
-
-In this project, we're using two data sets:
+In this study, we're using two data sets:
 
 1.  The WHO/UNICEF Joint Monitoring Programme for [Water Supply, Sanitation, and Hygiene (JMP) Global Database](https://washdata.org/data/household#!/)
+2.  The World Bank and OECD National Accounts data files on [GDP per capita (in current US\$) for East Asia & Pacific Region](https://data.worldbank.org/indicator/NY.GDP.PCAP.CD?end=2022&locations=4E&start=1960&view=chart)
 
-2.  The World Bank and OECD National Accounts data files on [GDP per capita (in current US$) for East Asia & Pacific Region](https://data.worldbank.org/indicator/NY.GDP.PCAP.CD?end=2022&locations=4E&start=1960&view=chart)
+This study will analyze:
+
+1.  the summary of 2022 JMP drinking water service ladder in the regional level,
+2.  the 2022 JMP drinking water service ladder for each country in the ASEAN region,
+3.  the relationship between GDP per capita and the levels of access to improved water service,
+4.  and the relationship between GDP per capita and the levels of access to safely managed drinking water service.
+
+There is currently no separate category that groups ASEAN countries in the JMP Global Database, as the United Nations (UN) only defined a more general "Eastern and South-Eastern Asia" region in its Report and Statistical Annex. Therefore, in order to make these analyses possible, a new regional system is defined in this study so ASEAN countries can be put into one separate "ASEAN" region.
 
 ```{r}
 # Loading the packages
 library(tidyverse)
 library(readxl)
 library(janitor)
+library(rmarkdown)
+library(ggplot2)
+library(gt)
+library(scales)
 
 # Importing datasets
 WLD_data_raw <- read_excel(here::here("data/raw/JMP_2023_WLD_.xlsx"))
@@ -325,7 +339,7 @@ WaterService_vs_GDP_regionAVG <- WaterService_vs_GDP_regionAVG |>
   relocate(served_percentage, .before = served_population_1000)
 WaterService_vs_GDP_regionAVG <- WaterService_vs_GDP_regionAVG[,1:12]
 
-# Counting world average so that we can compare access level average of the world to ASEAN countries
+# Counting world average so that we can compare service level average of the world to ASEAN countries
 WaterService_vs_GDP_refcolumn2 <- WaterService_vs_GDP_long |> 
   unite(refcolumn, year, residence, levels_service, method_waterservice, sep = "_") |> 
   relocate(refcolumn, .after = "id") |> 
@@ -392,21 +406,16 @@ write_csv(WaterService_vs_GDP_region_worldAVG, here::here("data/processed/WaterS
 # Writing WaterService_vs_GDP_ASEAN.csv from  WaterService_vs_GDP_ASEAN object
 write_csv(WaterService_vs_GDP_ASEAN, here::here("data/processed/WaterService_vs_GDP_ASEAN.csv"))
 
-
 ```
 
-### Analyzing and visualizing the data
+## Results
 
-(TBD)
+### Comparing water service level in the regional level
 
 ```{r}
 #| fig-width: 8
 #| label: fig-1
 #| fig-cap: ASEAN drinking water service level, compared to other SDG regions and world average
-
-library(ggplot2)
-
-# 1st plot = comparing 2022 drinking water service levels of ASEAN countries to other regions and world average
 
 # Filtering ASEAN's 2022 data on the national level of drinking water service levels
 # Preparing ASEAN urban percentage
@@ -432,20 +441,67 @@ WaterService_vs_GDP_ASEANAVG_2022 <- WaterService_vs_GDP_ASEAN |>
             GDPpercap = median(GDPpercap, na.rm = TRUE)) |> 
   mutate(served_percentage = served_population_1000 / country_population_1000 * 100) |> 
   left_join(WaterService_vs_GDP_ASEAN_2022_nationalurban[2,1:2])
+WaterService_vs_GDP_ASEAN_2022_safelymanaged <- WaterService_vs_GDP_ASEAN |> 
+  filter(year == 2022,
+         residence == "national",
+         levels_waterservice == "safely managed") |> 
+  group_by(region, year, residence, levels_waterservice) |> 
+  summarise(served_population_1000 = sum(served_population_1000, na.rm = TRUE),
+            country_population_1000 = sum(country_population_1000, na.rm = TRUE),
+            GDPpercap = median(GDPpercap, na.rm = TRUE)) |> 
+  mutate(served_percentage = served_population_1000 / country_population_1000 * 100)
+WaterService_vs_GDP_ASEANAVG_2022 <- WaterService_vs_GDP_ASEANAVG_2022 |> 
+  bind_rows(WaterService_vs_GDP_ASEAN_2022_safelymanaged) |> 
+  fill(urban_percentage)
 
 # Filtering region and world average data of drinking water service levels
 WaterService_vs_GDP_region_worldAVG_2022 <- WaterService_vs_GDP_region_worldAVG |> 
   filter(year == 2022,
          residence == "national",
-         levels_waterservice != "safely managed" & levels_waterservice != "improved")
+         levels_waterservice != "improved")
 
 # Data to be plotted
 plot1 <- WaterService_vs_GDP_region_worldAVG_2022 |> 
-  bind_rows(WaterService_vs_GDP_ASEANAVG_2022) |>
+  bind_rows(WaterService_vs_GDP_ASEANAVG_2022) |> 
   mutate(id = row_number())
-glimpse(plot1)
+plot1_basic <- plot1 |> 
+  filter(levels_waterservice == "basic") |> 
+  mutate(new_id = row_number())
+plot1_safelymanaged <- plot1 |> 
+  filter(levels_waterservice == "safely managed") |>
+  rename(safelymanaged_percentage = served_percentage) |> 
+  rename(safelymanaged_population_1000 = served_population_1000) |> 
+  mutate(new_id = row_number())
+plot1_basic_minus_safelymanaged <- plot1_basic |> 
+  left_join(plot1_safelymanaged[,10:12], by = "new_id") |> 
+  mutate(new_percentage = served_percentage - safelymanaged_percentage) |> 
+  mutate(new_population_1000 = served_population_1000 - safelymanaged_population_1000) |> 
+  relocate(id, .after = new_population_1000)
+plot1_basic_minus_safelymanaged <- plot1_basic_minus_safelymanaged[,12:16] 
+plot1_rank <- plot1_basic_minus_safelymanaged |> 
+  arrange(desc(safelymanaged_percentage)) |> 
+  left_join(plot1[,1:3], by = "id") |> 
+  mutate(rank = row_number()) |> 
+  relocate(rank, .after = "region")
+plot1_rank <- plot1_rank[,6:7]
+
+plot1 <- plot1 |> 
+  left_join(plot1_basic_minus_safelymanaged, by = "id") |> 
+  mutate(percentage = case_when(
+    levels_waterservice == "basic" ~ new_percentage,
+    TRUE ~ served_percentage)) |> 
+  mutate(population_1000 = case_when(
+    levels_waterservice == "basic" ~ new_population_1000,
+    TRUE ~ served_population_1000)) |> 
+  relocate(percentage, .after = method_waterservice) |> 
+  relocate(population_1000, .after = percentage)
+plot1 <- plot1[,1:11] |> 
+  left_join(plot1_rank, by = "region") |> 
+  rename(served_percentage = percentage) |> 
+  rename(served_population_1000 = population_1000)
+
 ggplot(data = plot1,
-       mapping = aes(x = region,
+       mapping = aes(x = reorder(region, rank, decreasing = TRUE),
                      y = served_percentage,
                      fill = levels_waterservice)) +
   geom_col() +
@@ -455,20 +511,428 @@ ggplot(data = plot1,
             position = position_stack(vjust = 0.5),
             size = 3,
             color = "white") +
-  theme(legend.position = "bottom") +
-  guides(fill = guide_legend(title = "Water service level"))
+  theme(legend.position = "bottom",
+        legend.text = element_text(size = 9)) +
+  guides(fill = guide_legend(title = NULL))
+
+```
+
+@fig-1 shows that the drinking water service level in the ASEAN region is slightly better than the world average. Most households in ASEAN region already have access to at least basic drinking water service, and 39.8% of households already have access to safely managed drinking water service. However, there is still large gap in the percentage of households with access to safely managed drinking water service between ASEAN region and Latin America & the Caribbean region.
+
+### Comparing water service level for each ASEAN country
+
+```{r}
+#| fig-width: 8
+#| label: fig-2
+#| fig-cap: ASEAN countries drinking water service level
+
+plot2 <- WaterService_vs_GDP_ASEAN |> 
+  filter(year == 2022,
+         residence == "national",
+         levels_waterservice != "improved") |> 
+  mutate(id = row_number())
+plot2_basic <- plot2 |> 
+  filter(levels_waterservice == "basic") |> 
+  mutate(new_id = row_number())
+plot2_safelymanaged <- plot2 |> 
+  filter(levels_waterservice == "safely managed") |>
+  rename(safelymanaged_percentage = served_percentage) |> 
+  rename(safelymanaged_population_1000 = served_population_1000) |> 
+  mutate(new_id = row_number())
+plot2_basic_minus_safelymanaged <- plot2_basic |> 
+  left_join(plot2_safelymanaged[,13:15], by = "new_id") |> 
+  mutate(new_percentage = case_when(
+    safelymanaged_percentage > 0 ~ served_percentage - safelymanaged_percentage,
+    TRUE ~ served_percentage)) |> 
+  mutate(new_population_1000 = case_when(
+    safelymanaged_population_1000 > 0 ~ served_population_1000 - safelymanaged_population_1000,
+    TRUE ~ served_population_1000)) |> 
+  relocate(id, .after = new_population_1000)
+plot2_basic_minus_safelymanaged <- plot2_basic_minus_safelymanaged[,15:19] 
+plot2_rank <- plot2_basic_minus_safelymanaged |> 
+  arrange(desc(safelymanaged_percentage)) |> 
+  left_join(plot2[,1:3], by = "id") |> 
+  mutate(rank = row_number()) |> 
+  relocate(rank, .after = country)
+plot2_rank <- plot2_rank[,7:8]
+  
+plot2 <- plot2 |> 
+  left_join(plot2_basic_minus_safelymanaged, by = "id") |> 
+  mutate(percentage = case_when(
+    levels_waterservice == "basic" ~ new_percentage,
+    TRUE ~ served_percentage)) |> 
+  mutate(population_1000 = case_when(
+    levels_waterservice == "basic" ~ new_population_1000,
+    TRUE ~ served_population_1000)) |> 
+  relocate(percentage, .after = method_waterservice) |> 
+  relocate(population_1000, .after = percentage) |> 
+  relocate(safelymanaged_percentage, .after = population_1000) |> 
+  relocate(safelymanaged_population_1000, .after = safelymanaged_percentage)
+plot2 <- plot2[,1:16] |> 
+  left_join(plot2_rank, by = "country") |> 
+  rename(served_percentage = percentage) |> 
+  rename(served_population_1000 = population_1000)
+
+ggplot(data = plot2,
+       mapping = aes(x = reorder(country, rank, decreasing = TRUE),
+                     y = served_percentage,
+                     fill = levels_waterservice)) +
+  geom_col() +
+  coord_flip() +
+  labs(x = "ASEAN country", y = "% of served households",
+       caption = "Note: The JMP data has no estimation on safely managed drinking water level in Brunei Darussalam and Thailand") +
+  geom_text(aes(label = round(served_percentage, 1)),
+            position = position_stack(vjust = 0.5),
+            size = 3,
+            color = "white") +
+  theme(legend.position = "bottom",
+        legend.text = element_text(size = 9)) +
+  guides(fill = guide_legend(title = NULL))
+
+```
+
+If we delve deeper and compare all countries in ASEAN region, as pictured in @fig-2, it is shown that Singapore and Malaysia hold the highest percentages of households with access to safely managed drinking water service, with their respective service level being 99% and 93.9%. On the contrary, Lao People's Democratic Republic and Cambodia have the least access to safely managed drinking water service, with service level being 17.9% and 29.1%, respectively.
+
+We can also highlight from @fig-2 that Myanmar and Cambodia have relatively lack of access in improved drinking water service on the national level. In 2022, 11.1% of households in Myanmar and 7.3% of households in Cambodia only use surface water as their daily source of drinking water.
+
+### How GDP per capita correlates with improved drinking water service level
+
+```{r}
+#| label: tbl-1
+#| tbl-cap: Comparison of all regions' characteristics, GDP per capita,<br>and % of households with access to improved drinking water service
+
+WaterService_vs_GDP_ASEAN_2022_improved <- WaterService_vs_GDP_ASEAN |> 
+  filter(year == 2022,
+         residence == "national",
+         levels_waterservice == "basic" | levels_waterservice == "limited") |> 
+  group_by(country) |> 
+  summarise(population_1000 = mean(country_population_1000, na.rm = TRUE),
+            median_GDPpercap = median(GDPpercap, na.rm = TRUE),
+            sum_served_population_1000 = sum(served_population_1000, na.rm = TRUE)) |> 
+  mutate(region = "ASEAN") |> 
+  mutate(served_percentage = sum_served_population_1000 / population_1000 * 100) |> 
+  group_by(region) |> 
+  summarise(count_country = n(),
+            sum_population_1000 = sum(population_1000),
+            min_GDPpercap = min(median_GDPpercap),
+            max_GDPpercap = max(median_GDPpercap),
+            median_GDPpercap = median(median_GDPpercap),
+            min_served_percentage = min(served_percentage),
+            max_served_percentage = max(served_percentage),
+            sum_served_population_1000 = sum(sum_served_population_1000)) |> 
+  mutate(mean_served_percentage = sum_served_population_1000 / sum_population_1000 * 100) |> 
+  relocate(median_GDPpercap, .after = min_GDPpercap) |> 
+  relocate(mean_served_percentage, .after = min_served_percentage)
+
+WaterService_vs_GDP_region_worldAVG_2022_improved <- WaterService_vs_GDP_long |> 
+  filter(year == 2022,
+         residence == "national",
+         levels_service == "basic" | levels_service == "limited") |> 
+  group_by(sdg_region, country) |> 
+  summarise(population_1000 = mean(country_population_1000, na.rm = TRUE),
+            median_GDPpercap = median(GDPpercap, na.rm = TRUE),
+            sum_served_population_1000 = ifelse(
+              all(is.na(served_population_1000)), NA, 
+              sum(served_population_1000, na.rm = TRUE))
+            ) |>   
+  mutate(served_percentage = sum_served_population_1000 / population_1000 * 100) |> 
+  group_by(sdg_region) |> 
+  summarise(count_country = n(),
+            sum_population_1000 = sum(population_1000, na.rm = TRUE),
+            min_GDPpercap = min(median_GDPpercap, na.rm = TRUE),
+            max_GDPpercap = max(median_GDPpercap, na.rm = TRUE),
+            median_GDPpercap = median(median_GDPpercap, na.rm = TRUE),
+            min_served_percentage = min(served_percentage, na.rm = TRUE),
+            max_served_percentage = max(served_percentage, na.rm = TRUE),
+            sum_served_population_1000 = sum(sum_served_population_1000, na.rm = TRUE)) |> 
+  mutate(mean_served_percentage = sum_served_population_1000 / sum_population_1000 * 100) |> 
+  relocate(median_GDPpercap, .after = min_GDPpercap) |>
+  relocate(mean_served_percentage, .after = min_served_percentage) |> 
+  rename(region = sdg_region)
+
+WaterService_vs_GDP_2022AVG_improved <- bind_rows(WaterService_vs_GDP_ASEAN_2022_improved, WaterService_vs_GDP_region_worldAVG_2022_improved) |> 
+  arrange(desc(mean_served_percentage))
+
+WaterService_vs_GDP_2022AVG_improved[,1:9] |> 
+  rename("Region" = region) |> 
+  rename("No. of countries" = count_country) |> 
+  rename("Population (1000)" = sum_population_1000) |> 
+  rename("Min. GDP per capita" = min_GDPpercap) |> 
+  rename("Median GDP per capita" = median_GDPpercap) |> 
+  rename("Max. GDP per capita" = max_GDPpercap) |> 
+  rename("Min. service level" = min_served_percentage) |> 
+  rename("Average service level" = mean_served_percentage) |> 
+  rename("Max. service level" = max_served_percentage) |> 
+  gt() |> 
+  fmt_number(columns = "Population (1000)",
+             use_seps = TRUE,
+             decimals = 0) |>   
+  fmt_currency(columns = "Min. GDP per capita":"Max. GDP per capita",
+               currency = "USD",
+               use_seps = TRUE,
+               decimals = 0) |> 
+  fmt_percent(columns = "Min. service level":"Max. service level",
+              scale = 0,
+              decimals = 1) |> 
+  tab_options(column_labels.font.weight = "bold",
+              table.font.size = px(13))
+
+```
+
+```{r}
+#| label: fig-3
+#| fig-cap: GDP per capita vs % of households with access to improved drinking water services
+
+plot3_allcountries <- WaterService_vs_GDP_long |> 
+  filter(year == 2022,
+         residence == "national",
+         levels_service == "basic" | levels_service == "limited") |> 
+  group_by(new_region, country) |> 
+  summarise(population_1000 = mean(country_population_1000, na.rm = TRUE),
+            GDPpercap = median(GDPpercap, na.rm = TRUE),
+            sum_served_population_1000 = ifelse(
+              all(is.na(served_population_1000)), NA, 
+              sum(served_population_1000, na.rm = TRUE))
+            ) |> 
+  mutate(served_percentage = sum_served_population_1000 / population_1000) |> 
+  rename(region = new_region) |> 
+  mutate(region = case_when(
+    region == "ASEAN" ~ region,
+    TRUE ~ "Other regions"))
+plot3_improved_rank <- plot3_allcountries |> 
+  filter(region == "ASEAN") |> 
+  arrange(desc(served_percentage)) |> 
+  mutate(rank = row_number()) |> 
+  relocate(country, .before = rank)
+plot3_improved_rank <- plot3_improved_rank[6:7]
+plot3 <- plot3_allcountries |> 
+  left_join(plot3_improved_rank, by = "country")
+
+# Calculating minimum GDP per capita a country need to provide improved drinking water service for all
+plot3_minGDP <- plot3_allcountries |>
+  filter(served_percentage == 0.99) |> 
+  summarise(min_GDPpercap = min(GDPpercap, na.rm = TRUE)) |> 
+  arrange(min_GDPpercap)
+
+# Calculating Spearman's rank correlation coefficient
+plot3_cor <-  cor.test(plot3$GDPpercap, plot3$served_percentage, use = "complete.obs", method = "spearman")
+plot3_conclusion <- paste(
+  case_when(plot3_cor$estimate >= 0.9 & plot3_cor$estimate <= 1 ~ "very strong",
+            plot3_cor$estimate >= 0.7 & plot3_cor$estimate < 0.9 ~ "strong",
+            plot3_cor$estimate >= 0.4 & plot3_cor$estimate < 0.7 ~ "moderate",
+            plot3_cor$estimate >= 0.2 & plot3_cor$estimate < 0.4 ~ "weak",
+            plot3_cor$estimate >= 0 & plot3_cor$estimate < 0.2 ~ "very weak"))
+plot3_relation <- paste(
+  case_when(plot3_cor$estimate > 0 & plot3_cor$estimate <= 1 ~ "positive",
+            plot3_cor$estimate < 0 & plot3_cor$estimate >= -1 ~ "negative"))
+plot3_caption <- paste(
+  "Spearman's ρ was used to assess the relationship between GDP per capita and water service level ( ρ = ",
+  sprintf("%.2f", plot3_cor$estimate), ", p = ", sprintf("%.3f", plot3_cor$p.value), "), showing a",
+  plot3_conclusion, "and ", plot3_relation, "correlation between the two variables")
+plot3_minGDP_print <- paste("US$", comma(min(plot3_minGDP$min_GDPpercap)))
+
+ggplot(data = plot3,
+       mapping = aes(x = GDPpercap,
+                     y = served_percentage,
+                     color = region,
+                     size = region)) +
+  geom_point() +
+  scale_color_manual(values = c("ASEAN" = "red3", "Other regions" = "gray80")) +
+  scale_size_manual(values = c("ASEAN" = 3, "Other regions" = 2)) +
+  # Adding extra layers of geom_point so the ASEAN points can be on top of other regions' 
+  geom_point(data = plot3 |>
+               filter(region == "ASEAN"),
+               color = "red3",
+               size = 3) +
+  geom_text(aes(label = case_when(
+                          rank <= 2 ~ country,
+                          rank >= 9 ~ country,
+                          TRUE ~ "")),
+            nudge_y = -0.025) +
+  ggtitle("GDP per capita vs % of households with access\nto improved drinking water services") +
+  labs(x = "GDP per capita", y = "percentage",
+       caption = str_wrap(plot3_caption, width = 95)) +
+  scale_x_continuous(labels = scales::dollar,
+                     trans = "log10") +
+  scale_y_continuous(labels = scales::percent) +
+  theme_minimal()
+
+```
+
+@tbl-1 shows that the ASEAN region ranks in 6th when it comes to providing access to improved drinking water service, with average water service level of 94.9%. On the regional level, the relationship between GDP per capita and the level of access to improved drinking water service remains unclear. However, if we plot the data on the country level using a scatter plot, as pictured in @fig-3, a `r plot3_conclusion`, `r plot3_relation` correlation exists [@schober2018] between the two variables. It appears that the countries able to provide all households with improved drinking water service have minimum GDP per capita of `r plot3_minGDP_print`.
+
+### How GDP per capita correlates with safely managed drinking water service level
+
+```{r}
+#| label: tbl-2
+#| tbl-cap: Comparison of all regions' characteristics, GDP per capita,<br>and % of households with access to safely managed drinking water service
+
+table2_ASEAN_2022_safelymanaged <- WaterService_vs_GDP_ASEAN |> 
+  filter(year == 2022,
+         residence == "national",
+         levels_waterservice == "safely managed") |> 
+  group_by(region) |> 
+  summarise(count_country = n(),
+            population_1000 = sum(country_population_1000),
+            min_GDPpercap = min(GDPpercap),
+            max_GDPpercap = max(GDPpercap),
+            median_GDPpercap = median(GDPpercap),
+            min_served_percentage = min(served_percentage, na.rm = TRUE),
+            max_served_percentage = max(served_percentage, na.rm = TRUE),
+            served_population_1000 = sum(served_population_1000, na.rm = TRUE)) |> 
+  mutate(mean_served_percentage = served_population_1000 / population_1000 * 100) |> 
+  relocate(median_GDPpercap, .after = min_GDPpercap) |> 
+  relocate(mean_served_percentage, .after = min_served_percentage)
+
+table2_region_worldAVG_2022_safelymanaged <- WaterService_vs_GDP_long |> 
+  filter(year == 2022,
+         residence == "national",
+         levels_service == "safely managed") |>
+  group_by(sdg_region) |> 
+  summarise(count_country = n(),
+            population_1000 = sum(country_population_1000, na.rm = TRUE),
+            min_GDPpercap = min(GDPpercap, na.rm = TRUE),
+            max_GDPpercap = max(GDPpercap, na.rm = TRUE),
+            median_GDPpercap = median(GDPpercap, na.rm = TRUE),
+            min_served_percentage = min(served_percentage, na.rm = TRUE),
+            max_served_percentage = max(served_percentage, na.rm = TRUE),
+            served_population_1000 = sum(served_population_1000, na.rm = TRUE)) |> 
+  mutate(mean_served_percentage = served_population_1000 / population_1000 * 100) |> 
+  relocate(median_GDPpercap, .after = min_GDPpercap) |>
+  relocate(mean_served_percentage, .after = min_served_percentage) |> 
+  rename(region = sdg_region)
+
+table2 <- bind_rows(table2_ASEAN_2022_safelymanaged, table2_region_worldAVG_2022_safelymanaged) |> 
+  arrange(desc(mean_served_percentage))
+
+table2[,1:9] |> 
+  rename("Region" = region) |> 
+  rename("No. of countries" = count_country) |> 
+  rename("Population (1000)" = population_1000) |> 
+  rename("Min. GDP per capita" = min_GDPpercap) |> 
+  rename("Median GDP per capita" = median_GDPpercap) |> 
+  rename("Max. GDP per capita" = max_GDPpercap) |> 
+  rename("Min. service level" = min_served_percentage) |> 
+  rename("Average service level" = mean_served_percentage) |> 
+  rename("Max. service level" = max_served_percentage) |> 
+  gt() |> 
+  fmt_number(columns = "Population (1000)",
+             use_seps = TRUE,
+             decimals = 0) |>   
+  fmt_currency(columns = "Min. GDP per capita":"Max. GDP per capita",
+               currency = "USD",
+               use_seps = TRUE,
+               decimals = 0) |> 
+  fmt_percent(columns = "Min. service level":"Max. service level",
+              scale = 0,
+              decimals = 1) |> 
+  tab_options(column_labels.font.weight = "bold",
+              table.font.size = px(13))
+
+```
+
+```{r}
+#| label: fig-4
+#| fig-cap: GDP per capita vs % of households with access to safely managed drinking water services
+
+plot4_allcountries <- WaterService_vs_GDP_long |> 
+  filter(year == 2022,
+         residence == "national",
+         levels_service == "safely managed") |> 
+  group_by(new_region, country) |> 
+  summarise(population_1000 = mean(country_population_1000, na.rm = TRUE),
+            GDPpercap = median(GDPpercap, na.rm = TRUE),
+            sum_served_population_1000 = ifelse(
+              all(is.na(served_population_1000)), NA, 
+              sum(served_population_1000, na.rm = TRUE))
+            ) |> 
+  mutate(served_percentage = sum_served_population_1000 / population_1000) |> 
+  rename(region = new_region) |> 
+  mutate(region = case_when(
+    region == "ASEAN" ~ region,
+    TRUE ~ "Other regions"))
+  
+plot4_improved_rank <- plot4_allcountries |> 
+  filter(region == "ASEAN") |> 
+  arrange(desc(served_percentage)) |> 
+  mutate(rank = row_number()) |> 
+  relocate(country, .before = rank)
+plot4_improved_rank <- plot4_improved_rank[6:7]
+plot4 <- plot4_allcountries |> 
+  left_join(plot4_improved_rank, by = "country")
+
+# Calculating minimum GDP per capita a country need to provide safely drinking water service for all
+plot4_minGDP <- plot4_allcountries |>
+  filter(served_percentage >= 0.99) |> 
+  summarise(min_GDPpercap = min(GDPpercap, na.rm = TRUE)) |> 
+  arrange(min_GDPpercap)
+plot4_minGDP_print <- paste("US$", comma(min(plot4_minGDP$min_GDPpercap)))
+
+# Calculating Spearman's rank correlation coefficient for plot 4
+plot4_cor <-  cor.test(plot4$GDPpercap, plot4$served_percentage, use = "complete.obs", method = "spearman")
+plot4_conclusion <- paste(
+  case_when(plot4_cor$estimate >= 0.9 & plot4_cor$estimate <= 1 ~ "very strong",
+            plot4_cor$estimate >= 0.7 & plot4_cor$estimate < 0.9 ~ "strong",
+            plot4_cor$estimate >= 0.4 & plot4_cor$estimate < 0.7 ~ "moderate",
+            plot4_cor$estimate >= 0.2 & plot4_cor$estimate < 0.4 ~ "weak",
+            plot4_cor$estimate >= 0 & plot4_cor$estimate < 0.2 ~ "very weak"))
+plot4_relation <- paste(
+  case_when(plot4_cor$estimate > 0 & plot4_cor$estimate <= 1 ~ "positive",
+            plot4_cor$estimate < 0 & plot4_cor$estimate >= -1 ~ "negative"))
+plot4_caption <- paste(
+  "Spearman's ρ was used to assess the relationship between GDP per capita and water service level ( ρ = ",
+  sprintf("%.2f", plot4_cor$estimate), ", p = ", sprintf("%.3f", plot4_cor$p.value), "), showing a",
+  plot4_conclusion, "and ", plot4_relation, "correlation between the two variables")
+
+ggplot(data = plot4,
+       mapping = aes(x = GDPpercap,
+                     y = served_percentage,
+                     color = region,
+                     size = region)) +
+  geom_point() +
+  scale_color_manual(values = c("ASEAN" = "red3", "Other regions" = "gray80")) +
+  scale_size_manual(values = c("ASEAN" = 3, "Other regions" = 2)) +
+  # Adding extra layers of geom_point so the ASEAN points can be on top of other regions' 
+  geom_point(data = plot4 |>
+               filter(region == "ASEAN"),
+               color = "red3",
+               size = 3) +
+  geom_text(aes(label = case_when(
+                          rank <= 2 ~ country,
+                          rank >= 9 ~ country,
+                          TRUE ~ "")),
+            nudge_y = -0.025) +
+  ggtitle("GDP per capita vs % of households with access to\nsafely managed drinking water services") +
+  labs(x = "GDP per capita", y = "percentage",
+       caption = str_wrap(plot4_caption, width = 95)) +
+  scale_x_continuous(labels = scales::dollar,
+                     trans = "log10") +
+  scale_y_continuous(labels = scales::percent) +
+  theme_minimal()
 
 
 ```
 
-## Results
+@tbl-2 attempts to take a glimpse on how all regions and countries progress towards the ambitious SDG target 6.1 and target 6.2. By region average, ASEAN countries place 3rd on providing safely managed drinking water service level. @fig-4 shows an even `r plot4_conclusion`er correlation between GDP per capita and safely drinking water service level, and it appears the countries able to provide all households with safely drinking water service have minimum GDP per capita of `r plot4_minGDP_print`.
 
-(TBD)
+## Further discussions
+
+As it is established that the economic health of a country --- represented by GDP per capita for the scope of this study --- strongly correlates with drinking water service level, it is pivotal for all countries to maintain a healthy GDP growth to ensure their ability to achieve universal coverage of drinking water. The percentage of GDP allocated to improve drinking water service level may vary depends on the countries' ambition for the goal, as providing safely managed drinking water services as targeted in the SDGs will be significantly more expensive than providing just the basic access as targeted in the MDGs [@rozenberg2019]. Projections indicate that most countries in the Asia-Pacific region (including ASEAN countries) will need to allocate between 1-2% of GDP on water supply and sanitation infrastructure over the period of 2015-2030 [@leckiefinancing] (Leckie et al, 2021). Based on the findings of this study, Myanmar and Cambodia will need to allocate greater share of their GDP to catch up with other countries in the ASEAN region.
+
+Another important thing to note is to maintain the quality of open water sources as it intrinsically links to health and economic production of a country, and thus affects the country's GDP. Research shows that when rivers in middle income countries become moderately polluted (BOD level between 2-8 mg/L), GDP growth is reduced by 1.76%, and when they become heavily polluted (BOD level \>8 mg/L), GDP growth is reduced by 2.5% [@dilipimpact] (Desbureaux et al, 2019).
+
+There are various GDP allocation strategy that countries can implement to achieve universal coverage of drinking water, including but not limited to (a) focusing on investments to extend access to unserved population and (b) focusing on investments on improving access level of the population with only access to unimproved and limited drinking water services. Future analyses should look into how the difference on strategies implemented in each country correlates on drinking water service level in each country.
 
 ## Conclusions
 
-(TBD)
+From this study, we can conclude that:
+
+-   On the regional level, ASEAN region ranks 6th of all regions in level of access to improved drinking water service, with the service level being 94.9% of its households. To break into more details based on the JMP drinking water ladder:
+    -   39.8% of ASEAN households already have access to safely managed drinking water service (ranks 3rd of all regions),
+    -   54.3% of ASEAN households have access to basic drinking water service,
+    -   and 0.8% of households have access to limited drinking water service.
+-   Households in Singapore and Malaysia have the highest access to safely managed drinking water service in the ASEAN region, with service level being 99% and 93.9%, respectively.
+-   A `r plot3_conclusion`, `r plot3_relation` correlation exists between ASEAN and other countries' access level to improved drinking water service and their GDP per capita.
+-   A `r plot4_relation`, yet even `r plot4_conclusion`er correlation exists between ASEAN and other countries' access level to safely managed drinking water service and their GDP per capita.
 
 ## References
-
-(TBD)
