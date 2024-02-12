@@ -1,8 +1,8 @@
 ---
 title: "Drinking Water Service Level and Gross Domestic Product (GDP) per capita in ASEAN Countries: A Comparative Study"
-date: today
+date: 2024-02-13
 author:
-  name: "Adnan Wijayarso"
+  name: "Adnan Rafif Wijayarso"
   orcid: 0009-0005-0216-5559
   email: "adnanwijayarso@gmail.com"
 abstract:
@@ -18,6 +18,7 @@ citation:
   container-title: My Blog
   url: https://www.example.com
 bibliography: references.bib
+csl: apa-numeric-superscript-brackets.csl
 link-citations: true
 editor: source
 ---
@@ -917,9 +918,9 @@ ggplot(data = plot4,
 
 ## Further discussions
 
-As it is established that the economic health of a country --- represented by GDP per capita for the scope of this study --- strongly correlates with drinking water service level, it is pivotal for all countries to maintain a healthy GDP growth to ensure their ability to achieve universal coverage of drinking water. The percentage of GDP allocated to improve drinking water service level may vary depends on the countries' ambition for the goal, as providing safely managed drinking water services as targeted in the SDGs will be significantly more expensive than providing just the basic access as targeted in the MDGs [@rozenberg2019]. Projections indicate that most countries in the Asia-Pacific region (including ASEAN countries) will need to allocate between 1-2% of GDP on water supply and sanitation infrastructure over the period of 2015-2030 [@leckiefinancing] (Leckie et al, 2021). Based on the findings of this study, Myanmar and Cambodia will need to allocate greater share of their GDP to catch up with other countries in the ASEAN region.
+As it is established that the economic health of a country --- represented by GDP per capita for the scope of this study --- strongly correlates with drinking water service level, it is pivotal for all countries to maintain a healthy GDP growth to ensure their ability to achieve universal coverage of drinking water. The percentage of GDP allocated to improve drinking water service level may vary depends on the countries' ambition for the goal, as providing safely managed drinking water services as targeted in the SDGs will be significantly more expensive than providing just the basic access as targeted in the MDGs [@rozenberg2019]. Projections indicate that most countries in the Asia-Pacific region (including ASEAN countries) will need to allocate between 1-2% of GDP on water supply and sanitation infrastructure over the period of 2015-2030 [@financin2021]. Based on the findings of this study, Myanmar and Cambodia will need to allocate greater share of their GDP to catch up with other countries in the ASEAN region.
 
-Another important thing to note is to maintain the quality of open water sources as it intrinsically links to health and economic production of a country, and thus affects the country's GDP. Research shows that when rivers in middle income countries become moderately polluted (BOD level between 2-8 mg/L), GDP growth is reduced by 1.76%, and when they become heavily polluted (BOD level \>8 mg/L), GDP growth is reduced by 2.5% [@dilipimpact] (Desbureaux et al, 2019).
+Another important thing to note is to maintain the quality of open water sources as it intrinsically links to health and economic production of a country, and thus affects the country's GDP. Research shows that when rivers in middle income countries become moderately polluted (BOD level between 2-8 mg/L), GDP growth is reduced by 1.76%, and when they become heavily polluted (BOD level \>8 mg/L), GDP growth is reduced by 2.5% [@russ2022].
 
 There are various GDP allocation strategy that countries can implement to achieve universal coverage of drinking water, including but not limited to (a) focusing on investments to extend access to unserved population and (b) focusing on investments on improving access level of the population with only access to unimproved and limited drinking water services. Future analyses should look into how the difference on strategies implemented in each country correlates on drinking water service level in each country.
 
