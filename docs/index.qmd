@@ -15,8 +15,7 @@ format:
 execute: 
   warning: false
 citation: 
-  container-title: My Blog
-  url: https://www.example.com
+  url: https://ds4owd-001.github.io/project-adnanwijayarso/
 bibliography: references.bib
 csl: apa-numeric-superscript-brackets.csl
 link-citations: true
